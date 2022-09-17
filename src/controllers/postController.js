@@ -36,8 +36,12 @@ class PostController {
 
         const { userId } = req
         const { text } = req.body
+        
+        console.log(req.file)
+        console.log(req.body)
         const file = req.file?.path
-
+        console.log(file)
+        
         try {
             const currentUser = await user.findById(userId)
 
@@ -67,7 +71,7 @@ class PostController {
                 profile.findOneAndUpdate({user: [{_id: currentUser._id}]}, {$push: {post: savedPost}}).exec()
 
             } else if ( text == '' && file != undefined) {
-
+                
                 const postImage = await cloudinary.uploader.upload(file);
 
                 let postagem = new post({
@@ -110,13 +114,27 @@ class PostController {
 
         await profile.findOneAndUpdate({post: id}, {$pull: {post: id}}).exec()
 
-        post.findByIdAndDelete(id, (err) => {
-            if(!err) {
-                res.status(200).send({message: 'Post excluído com sucesso'})
-            } else {
-                res.status(500).send({message: `${err.message} - Falha ao excluir post`})
-            }
-        })
+        const getPost = await post.findById(id)
+
+        if(getPost.imageId != undefined) {
+            await cloudinary.uploader.destroy(getPost.imageId)
+
+            getPost.remove((err) => {
+                if (!err) {
+                    res.status(200).send({ message: "Post excluído com sucesso" })
+                } else {
+                    res.status(500).send({ message: `${err.message} - Falha ao excluir o post` })
+                }
+            })
+        } else {
+            getPost.remove((err) => {
+                if (!err) {
+                    res.status(200).send({ message: "Post excluído com sucesso" })
+                } else {
+                    res.status(500).send({ message: `${err.message} - Falha ao excluir o post` })
+                }
+            })
+        }
     }
 
     static curtirPost = async (req, res) => {
