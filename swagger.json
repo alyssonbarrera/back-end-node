@@ -676,6 +676,24 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "example": {
+                                        "message": "Erro ao excluir usuário"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
